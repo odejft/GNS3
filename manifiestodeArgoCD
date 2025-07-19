@@ -1,0 +1,1 @@
+kubectl apply -f gns3-app.yaml -n argocd
