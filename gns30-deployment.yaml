@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: gns3
-          image: gns3/gns3-server:latest
+          image: gns3/gns3-server:2.2.34
           ports:
             - containerPort: 3089
           env:
