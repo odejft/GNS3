@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,4 +32,3 @@ spec:
       - name: dockersock
         hostPath:
           path: /var/run/docker.sock
-
