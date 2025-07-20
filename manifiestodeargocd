@@ -1,1 +1,6 @@
-kubectl apply -f gns3-app.yaml -n argocd
+argocd app create gns3-app \
+  --repo git@github.com:tuusuario/tu-repo.git \
+  --path ruta/al/manifiesto \
+  --dest-server https://kubernetes.default.svc \
+  --dest-namespace argocd \
+  --upsert
