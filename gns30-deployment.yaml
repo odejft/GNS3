@@ -3,8 +3,6 @@ kind: Deployment
 metadata:
   name: gns3
   namespace: gns3
-  labels:
-    app: gns3
 spec:
   replicas: 1
   selector:
@@ -15,32 +13,21 @@ spec:
       labels:
         app: gns3
     spec:
+      hostNetwork: true
       containers:
-        - name: gns3
-          image: pmietlicki/gns3-server:latest
-          ports:
-            - containerPort: 3089
-          env:
-            - name: GNS3_SERVER_BIND_ADDRESS
-              value: "0.0.0.0"
-          resources:
-            limits:
-              cpu: "1"
-              memory: "1Gi"
-            requests:
-              cpu: "0.5"
-              memory: "512Mi"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: gns3-service
-  namespace: gns3
-spec:
-  selector:
-    app: gns3
-  ports:
-    - protocol: TCP
-      port: 3089
-      targetPort: 3089
-  type: ClusterIP
+      - name: gns3
+        image: pmietlicki/gns3-server:latest
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: dockersock
+          mountPath: /var/run/docker.sock
+        ports:
+        - containerPort: 3080
+        env:
+        - name: GNS3_SERVER_BIND_ADDRESS
+          value: "0.0.0.0"
+      volumes:
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
