@@ -1,52 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: news-site
+  namespace: gns3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: news-site
+  template:
+    metadata:
+      labels:
+        app: news-site
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html-volume
+        configMap:
+          name: news-html
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: news-html
+  namespace: gns3
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>Noticias en Tiempo Real</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #ffffff;
+          color: #003366;
+          padding: 2rem;
+        }
+        header {
+          background-color: #003366;
+          color: white;
+          padding: 1rem;
+          text-align: center;
+        }
+        .news {
+          margin-top: 2rem;
+        }
+        .news-item {
+          margin-bottom: 1rem;
+          padding: 1rem;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          background-color: #f0f8ff;
+        }
+      </style>
+      <script>
+        function updateTime() {
+          const now = new Date();
+          document.getElementById('time').innerText = now.toLocaleString();
+        }
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Noticias en Tiempo Real</title>
-  <style>
-    body {
-      background-color: #f0f8ff;
-      color: #003366;
-      font-family: Arial, sans-serif;
-      padding: 2rem;
-    }
-    header {
-      text-align: center;
-      font-size: 2rem;
-      margin-bottom: 2rem;
-    }
-    #fecha-hora {
-      text-align: center;
-      font-size: 1.2rem;
-      margin-bottom: 2rem;
-    }
-    .noticia {
-      background-color: #ffffff;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-left: 4px solid #007BFF;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-  </style>
-</head>
-<body>
-  <header>📰 Noticias en Tiempo Real</header>
-  <div id="fecha-hora"></div>
-  <div id="noticias">
-    <div class="noticia">🔹 Noticia 1: Lorem ipsum dolor sit amet.</div>
-    <div class="noticia">🔹 Noticia 2: Consectetur adipiscing elit.</div>
-    <div class="noticia">🔹 Noticia 3: Integer nec odio. Praesent libero.</div>
-  </div>
+        function fetchNews() {
+          const news = [
+            { title: "Gobierno anuncia nuevo plan energético", time: "08:00 AM" },
+            { title: "Economía crece 3.2% en el segundo trimestre", time: "09:30 AM" },
+            { title: "Inicia cumbre regional de tecnología", time: "10:45 AM" }
+          ];
 
-  <script>
-    function actualizarHora() {
-      const now = new Date();
-      document.getElementById("fecha-hora").textContent =
-        "📅 " + now.toLocaleDateString() + " ⏰ " + now.toLocaleTimeString();
-    }
-    setInterval(actualizarHora, 1000);
-    actualizarHora();
-  </script>
-</body>
-</html>
+          const container = document.getElementById('news');
+          container.innerHTML = "";
+          news.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "news-item";
+            div.innerHTML = `<strong>${item.title}</strong><br><small>${item.time}</small>`;
+            container.appendChild(div);
+          });
+        }
+
+        window.onload = () => {
+          updateTime();
+          fetchNews();
+          setInterval(updateTime, 60000);
+        };
+      </script>
+    </head>
+    <body>
+      <header>
+        <h1>Noticias en Tiempo Real</h1>
+        <p id="time">Cargando hora...</p>
+      </header>
+      <section class="news" id="news">
+        <!-- Noticias cargadas por JS -->
+      </section>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: news-service
+  namespace: gns3
+spec:
+  selector:
+    app: news-site
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30080
+  type: NodePort
