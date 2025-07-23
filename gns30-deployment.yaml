@@ -1,33 +1,52 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: gns3
-  namespace: gns3
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: gns3
-  template:
-    metadata:
-      labels:
-        app: gns3
-    spec:
-      hostNetwork: true
-      containers:
-      - name: gns3
-        image: pmietlicki/gns3-server:latest
-        securityContext:
-          privileged: true
-        volumeMounts:
-        - name: dockersock
-          mountPath: /var/run/docker.sock
-        ports:
-        - containerPort: 3080
-        env:
-        - name: GNS3_SERVER_BIND_ADDRESS
-          value: "0.0.0.0"
-      volumes:
-      - name: dockersock
-        hostPath:
-          path: /var/run/docker.sock
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Noticias en Tiempo Real</title>
+  <style>
+    body {
+      background-color: #f0f8ff;
+      color: #003366;
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+    }
+    header {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+    #fecha-hora {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    .noticia {
+      background-color: #ffffff;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid #007BFF;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <header>📰 Noticias en Tiempo Real</header>
+  <div id="fecha-hora"></div>
+  <div id="noticias">
+    <div class="noticia">🔹 Noticia 1: Lorem ipsum dolor sit amet.</div>
+    <div class="noticia">🔹 Noticia 2: Consectetur adipiscing elit.</div>
+    <div class="noticia">🔹 Noticia 3: Integer nec odio. Praesent libero.</div>
+  </div>
+
+  <script>
+    function actualizarHora() {
+      const now = new Date();
+      document.getElementById("fecha-hora").textContent =
+        "📅 " + now.toLocaleDateString() + " ⏰ " + now.toLocaleTimeString();
+    }
+    setInterval(actualizarHora, 1000);
+    actualizarHora();
+  </script>
+</body>
+</html>
